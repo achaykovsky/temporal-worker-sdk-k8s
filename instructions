@@ -1,0 +1,89 @@
+Infra / Platform Engineer
+
+Objective
+
+Build a small Temporal-based distributed system, package it as a reusable worker SDK, and run it locally on Kubernetes.
+
+Focus on correctness, platform thinking, and engineering quality.
+
+Requirements
+
+1. Worker SDK
+
+Create a small framework/SDK for running Temporal workers.
+
+It should include:
+
+* Standardized worker bootstrap (configurable via env)
+
+Design it as if other teams will use it.
+
+2. Distributed Calculator Workflow
+
+Implement a workflow that evaluates an arithmetic expression like:
+
+1 + 5^3 * (2 - 5)
+
+Requirements:
+
+* Input is a single string expression
+* Support operators: + - * / ^ and parentheses
+* Respect precedence and associativity
+* Each operator type must be executed by a different worker and task queue
+* The workflow orchestrates the execution
+
+Design and parsing approach is up to you.
+
+3. SDK Upgrade Requirement
+
+Add:
+
+* Graceful shutdown
+* Basic observability (metrics + logs)
+* Liveness and readiness probes
+
+Add health probes in a way that:
+
+* Existing workers do not require code changes
+* Only upgrading the SDK enables probes
+
+4. Kubernetes
+
+Run everything on a local Kubernetes cluster (kind/minikube/etc).
+
+Provide:
+
+* Manifests or Helm
+* Script to deploy
+* Script to trigger a complex calculation
+
+5. Bonus – Autoscaling
+
+Implement horizontal autoscaling for workers.
+
+Provide:
+
+* A stress test that increases and decreases load
+* Explanation of:
+
+  * Which metric you scale on
+  * Why you chose it
+  * Limitations of your approach
+
+Deliverables
+
+* Source code
+* README explaining how to run
+* Short design explanation (architecture + tradeoffs)
+* If LLM was used:
+
+  * Prompts
+  * Planning approach
+  * Number of iterations
+  * How iterations could be reduced
+
+What We Evaluate
+
+* Engineering quality
+* System design thinking
+* Clarity of explanation 
