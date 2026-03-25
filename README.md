@@ -28,10 +28,11 @@ poetry run pytest -m "not integration"
 
 **End-to-end on minikube**
 
-1. Create the Postgres secret (see [PostgreSQL Secret](#postgresql-secret-no-cleartext-in-git)).
-2. Build and load the worker image: `docker build -t calculator-worker:0.1.0 .` then `minikube image load calculator-worker:0.1.0`.
-3. Deploy: `./scripts/deploy.sh` (Unix) or `.\scripts\deploy.ps1` (PowerShell).
-4. Port-forward Temporal: `kubectl port-forward -n temporal svc/temporal --address 127.0.0.1 7233:7233`, then `poetry run python scripts/trigger_calculator_workflow.py`.
+1. Start the cluster if needed (e.g. `minikube start`); see [Local Kubernetes](#local-kubernetes-minikube).
+2. Create the `temporal` namespace, then the Postgres secret: `kubectl apply -f k8s/namespace.yaml`, then follow [PostgreSQL Secret](#postgresql-secret-no-cleartext-in-git).
+3. Build and load the worker image: `docker build -t calculator-worker:0.1.0 .` then `minikube image load calculator-worker:0.1.0`.
+4. Deploy: `./scripts/deploy.sh` (Unix) or `.\scripts\deploy.ps1` (PowerShell).
+5. Wait until Temporal and calculator workers are Ready (`kubectl -n temporal get pods`), then port-forward: `kubectl port-forward -n temporal svc/temporal --address 127.0.0.1 7233:7233`. In another shell: `poetry run python scripts/trigger_calculator_workflow.py`.
 
 Optional HPA: `./scripts/deploy.sh --with-hpa` or `.\scripts\deploy.ps1 -ApplyHpa` (requires metrics-server). Details: [Autoscaling (bonus)](#autoscaling-bonus).
 
@@ -287,6 +288,8 @@ Worker pods use `imagePullPolicy: Never` for that tag.
 
 ### PostgreSQL Secret (no cleartext in git)
 
+The **`temporal` namespace must exist** before creating the secret (`kubectl apply -f k8s/namespace.yaml` if you have not applied it yet).
+
 Create once per cluster (`POSTGRES_USER`, `POSTGRES_PASSWORD`):
 
 ```bash
@@ -350,7 +353,7 @@ kubectl port-forward -n temporal svc/temporal --address 127.0.0.1 7233:7233
 poetry run python scripts/trigger_calculator_workflow.py
 ```
 
-Optional: first argument or `CALC_EXPRESSION`. On success prints the decimal result; on failure prints `workflow_failed: …` and exits non-zero.
+Optional: positional expression or `CALC_EXPRESSION`; override connection with `TEMPORAL_ADDRESS` / `TEMPORAL_NAMESPACE` or `--address` / `--namespace` (defaults match the in-cluster ConfigMap: `127.0.0.1:7233` and `default`). On success prints the decimal result; on failure prints `workflow_failed: …` and exits non-zero.
 
 ### Autoscaling (bonus)
 
@@ -378,7 +381,7 @@ poetry run python scripts/stress_calculator_workers.py \
   --concurrency 16 --duration-sec 420
 ```
 
-Overrides: `STRESS_CONCURRENCY`, `STRESS_DURATION_SEC`, `CALC_EXPRESSION`, `STRESS_K8S_NAMESPACE`, `STRESS_K8S_DEPLOYMENT`.
+Overrides: `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE`, `STRESS_CONCURRENCY`, `STRESS_DURATION_SEC`, `CALC_EXPRESSION`, `STRESS_K8S_NAMESPACE`, `STRESS_K8S_DEPLOYMENT` (or the matching CLI flags).
 
 **Deploy paths:** default scripts **without** HPA; `--with-hpa` / `-ApplyHpa` / manual apply of the HPA manifest.
 
