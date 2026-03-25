@@ -41,6 +41,9 @@ spec:
             - name: grpc
               containerPort: 7233
           env:
+            # Listen on all interfaces so kubectl port-forward (connects to 127.0.0.1 in the pod) works.
+            - name: BIND_ON_IP
+              value: "0.0.0.0"
             - name: DB
               value: postgres12
             - name: DB_PORT
