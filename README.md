@@ -258,6 +258,8 @@ Before calling the stack “done” for a review, see [Cross-cutting guardrails 
 
 ## Local Kubernetes (minikube)
 
+**Cluster must be running** before any `kubectl` command. If errors mention `localhost:8080` or `[::1]:8080`, there is no API server in your kubeconfig context—start the cluster (e.g. `minikube start`) and confirm `kubectl cluster-info`.
+
 Namespace **`temporal`**: in-cluster **PostgreSQL**, **`temporalio/auto-setup`**, six calculator worker Deployments. Manifests: [`k8s/`](k8s/).
 
 **Resources:** Default minikube (~2 CPUs / ~2Gi) matches manifest **requests**; if pods stay Pending or OOM, raise CPUs/memory and recreate the cluster. Worker **limits** are in `k8s/workers.yaml` and `k8s/temporal.yaml`.
@@ -290,6 +292,14 @@ Create once per cluster (`POSTGRES_USER`, `POSTGRES_PASSWORD`):
 ```bash
 kubectl -n temporal create secret generic postgres-credentials \
   --from-literal=POSTGRES_USER=temporal \
+  --from-literal=POSTGRES_PASSWORD='<strong-password>'
+```
+
+On **PowerShell**, use a single line or backtick (`` ` ``) continuation—`\` is bash-only and triggers a parser error on lines starting with `--`:
+
+```powershell
+kubectl -n temporal create secret generic postgres-credentials `
+  --from-literal=POSTGRES_USER=temporal `
   --from-literal=POSTGRES_PASSWORD='<strong-password>'
 ```
 
@@ -384,6 +394,7 @@ Load the image into nodes (`kind load docker-image calculator-worker:0.1.0`). **
 
 | Symptom | What to try |
 |--------|-------------|
+| `dial tcp [::1]:8080` / `localhost:8080` refused | No cluster in use: `kubectl` defaults to `http://localhost:8080` without a valid context. Start the cluster (`minikube start`, or enable Kubernetes in Docker Desktop), then `kubectl config use-context minikube` (or your context) and `kubectl cluster-info`. |
 | Wrong cluster | `kubectl config current-context`; use `minikube` if intended. |
 | `ImagePullBackOff` | Build and `minikube image load calculator-worker:0.1.0`; `imagePullPolicy: Never`. |
 | `CreateContainerConfigError` | Secret `postgres-credentials` missing or wrong keys. |
