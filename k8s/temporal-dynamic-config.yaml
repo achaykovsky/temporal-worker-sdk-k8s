@@ -1,0 +1,14 @@
+# Mirrors temporalio/docker-compose dynamicconfig/development-sql.yaml for the pinned auto-setup image.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: temporal-dynamic-config
+  namespace: temporal
+data:
+  development-sql.yaml: |
+    limit.maxIDLength:
+      - value: 255
+        constraints: {}
+    system.forceSearchAttributesCacheRefreshOnRead:
+      - value: true
+        constraints: {}

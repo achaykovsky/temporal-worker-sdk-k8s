@@ -1,0 +1,338 @@
+# Six Deployments: one workflow worker + five operator workers. Image must exist in the node (e.g. minikube image load).
+# Resource requests/limits sized for default minikube profile (~2 CPUs / ~2Gi); raise if pods are throttled (see README).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-worker-workflow
+  namespace: temporal
+  labels:
+    app.kubernetes.io/name: calculator-worker
+    app.kubernetes.io/component: workflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: calculator-worker
+      app.kubernetes.io/component: workflow
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: calculator-worker
+        app.kubernetes.io/component: workflow
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: worker
+          image: calculator-worker:0.1.0
+          imagePullPolicy: Never
+          ports:
+            - name: probes
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: calculator-worker-env
+          env:
+            - name: TEMPORAL_TASK_QUEUE
+              value: calc-workflows
+            - name: WORKER_ROLE
+              value: workflow
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-worker-add
+  namespace: temporal
+  labels:
+    app.kubernetes.io/name: calculator-worker
+    app.kubernetes.io/component: add
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: calculator-worker
+      app.kubernetes.io/component: add
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: calculator-worker
+        app.kubernetes.io/component: add
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: worker
+          image: calculator-worker:0.1.0
+          imagePullPolicy: Never
+          ports:
+            - name: probes
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: calculator-worker-env
+          env:
+            - name: TEMPORAL_TASK_QUEUE
+              value: calc-add
+            - name: WORKER_ROLE
+              value: add
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-worker-sub
+  namespace: temporal
+  labels:
+    app.kubernetes.io/name: calculator-worker
+    app.kubernetes.io/component: sub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: calculator-worker
+      app.kubernetes.io/component: sub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: calculator-worker
+        app.kubernetes.io/component: sub
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: worker
+          image: calculator-worker:0.1.0
+          imagePullPolicy: Never
+          ports:
+            - name: probes
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: calculator-worker-env
+          env:
+            - name: TEMPORAL_TASK_QUEUE
+              value: calc-sub
+            - name: WORKER_ROLE
+              value: sub
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-worker-mul
+  namespace: temporal
+  labels:
+    app.kubernetes.io/name: calculator-worker
+    app.kubernetes.io/component: mul
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: calculator-worker
+      app.kubernetes.io/component: mul
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: calculator-worker
+        app.kubernetes.io/component: mul
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: worker
+          image: calculator-worker:0.1.0
+          imagePullPolicy: Never
+          ports:
+            - name: probes
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: calculator-worker-env
+          env:
+            - name: TEMPORAL_TASK_QUEUE
+              value: calc-mul
+            - name: WORKER_ROLE
+              value: mul
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-worker-div
+  namespace: temporal
+  labels:
+    app.kubernetes.io/name: calculator-worker
+    app.kubernetes.io/component: div
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: calculator-worker
+      app.kubernetes.io/component: div
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: calculator-worker
+        app.kubernetes.io/component: div
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: worker
+          image: calculator-worker:0.1.0
+          imagePullPolicy: Never
+          ports:
+            - name: probes
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: calculator-worker-env
+          env:
+            - name: TEMPORAL_TASK_QUEUE
+              value: calc-div
+            - name: WORKER_ROLE
+              value: div
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-worker-pow
+  namespace: temporal
+  labels:
+    app.kubernetes.io/name: calculator-worker
+    app.kubernetes.io/component: pow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: calculator-worker
+      app.kubernetes.io/component: pow
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: calculator-worker
+        app.kubernetes.io/component: pow
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: worker
+          image: calculator-worker:0.1.0
+          imagePullPolicy: Never
+          ports:
+            - name: probes
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: calculator-worker-env
+          env:
+            - name: TEMPORAL_TASK_QUEUE
+              value: calc-pow
+            - name: WORKER_ROLE
+              value: pow
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: probes
+            initialDelaySeconds: 5
+            periodSeconds: 5

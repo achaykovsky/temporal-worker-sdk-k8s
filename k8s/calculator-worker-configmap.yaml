@@ -1,0 +1,11 @@
+# Non-sensitive env shared by all calculator worker Deployments (address / namespace / logging).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: calculator-worker-env
+  namespace: temporal
+data:
+  TEMPORAL_ADDRESS: temporal:7233
+  TEMPORAL_NAMESPACE: default
+  LOG_JSON: "true"
+  TEMPORAL_WORKER_HEALTH_ADDR: "0.0.0.0:8080"
