@@ -160,20 +160,25 @@ Starter uses **15m** execution timeout; activities **60s** start-to-close, retry
 
 ## Topology
 
-One workflow worker + one worker per operator queue. Client starts **`CalculatorWorkflow`** on **`calc-workflows`**; the workflow schedules activities on the five operator queues.
+Six workers: **one** polls **`calc-workflows`** and runs **`CalculatorWorkflow`**; **five** poll **`calc-add`** … **`calc-pow`** (one binary operator each). The client starts the workflow on **`calc-workflows`**; Temporal delivers workflow tasks to the workflow worker and activity tasks to the operator workers.
 
 ```mermaid
 flowchart LR
-  Client[Client] -->|calc-workflows| Temporal[Temporal]
+  Client[Client / Script] -->|calc-workflows| Temporal[Temporal service]
   Temporal --> W[CalculatorWorkflow]
   W --> QAdd[calc-add]
   W --> QSub[calc-sub]
   W --> QMul[calc-mul]
   W --> QDiv[calc-div]
   W --> QPow[calc-pow]
+  QAdd --> WA[Worker +]
+  QSub --> WB[Worker -]
+  QMul --> WC[Worker *]
+  QDiv --> WD[Worker /]
+  QPow --> WE[Worker ^]
 ```
 
-More detail: [requirements-architecture.md](specs/requirements/requirements-architecture.md).
+**Tradeoffs** (per-queue workers, parsing location, probes, limits, semantics) are written as **Decision** sections with pros, cons, and consequences in [specs/requirements/requirements-architecture.md](specs/requirements/requirements-architecture.md) — same diagram is maintained there.
 
 ## Kubernetes
 
