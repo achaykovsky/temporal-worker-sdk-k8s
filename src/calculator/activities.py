@@ -1,4 +1,8 @@
-"""Per-operator activities: ``str`` decimals on the wire (high precision), no per-activity quantize."""
+"""
+Per-operator activities: ``str`` decimals on the wire (high precision), no per-activity quantize.
+
+Logging is handled by ``temporal_worker_sdk`` interceptors so these stay free of I/O and secrets.
+"""
 
 from __future__ import annotations
 

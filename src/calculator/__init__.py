@@ -1,4 +1,8 @@
-"""Reference calculator: Temporal workflow/activity contracts and workflow implementation."""
+"""
+Reference calculator: Temporal workflow/activity contracts and workflow implementation.
+
+Packaged for import as ``calculator`` from ``src`` on ``PYTHONPATH`` (see README / Docker).
+"""
 
 from calculator.contracts import (
     ACTIVITY_ADD,
