@@ -1,4 +1,4 @@
-# Temporal Worker SDK for Kubernetes
+# Temporal Worker SDK and Calculator on Kubernetes
 
 Reusable **Temporal worker SDK** for Python (`temporal_worker_sdk`) plus a reference **distributed calculator** (`calculator`): one workflow task queue and five operator queues so each binary operation runs on a dedicated worker. The repo includes **Kubernetes manifests**, deploy scripts, a workflow trigger script, and optional **horizontal pod autoscaling** (HPA) on CPU for the add worker.
 
