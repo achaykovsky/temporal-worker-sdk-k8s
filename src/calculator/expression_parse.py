@@ -20,6 +20,8 @@ from calculator.limits import enforce_binary_operator_budget, enforce_pre_parse_
 
 
 class TokenKind(Enum):
+    """Lexeme categories for the calculator grammar (single-byte ASCII only)."""
+
     NUMBER = auto()
     PLUS = auto()
     MINUS = auto()
@@ -32,6 +34,8 @@ class TokenKind(Enum):
 
 @dataclass(frozen=True, slots=True)
 class Token:
+    """NUMBER carries the raw literal substring; other kinds use the default empty ``value``."""
+
     kind: TokenKind
     value: str = ""
 
@@ -43,6 +47,7 @@ def is_integral_decimal(value: Decimal) -> bool:
     return lo == hi
 
 
+# Maps one-byte operators and delimiters; numbers are handled in the lexer loop (variable length).
 _SINGLE_CHAR_KIND: Final[dict[str, TokenKind]] = {
     "+": TokenKind.PLUS,
     "-": TokenKind.MINUS,
@@ -71,6 +76,7 @@ def tokenize(stripped: str) -> list[Token]:
             continue
         if c.isdigit() or c == ".":
             start = i
+            # Leading '.' requires a digit next (".5" ok, bare "." is a syntax error).
             if c == ".":
                 j = i + 1
                 if j >= n or not stripped[j].isdigit():
@@ -84,6 +90,7 @@ def tokenize(stripped: str) -> list[Token]:
                 tokens.append(Token(TokenKind.NUMBER, num))
                 i = j
                 continue
+            # Integer part optional after '.' already handled; here digit-led integers and decimals.
             j = i
             while j < n and stripped[j].isdigit():
                 j += 1
@@ -102,17 +109,23 @@ def tokenize(stripped: str) -> list[Token]:
 
 @dataclass(slots=True)
 class NumberNode:
+    """Leaf: already-validated ``Decimal`` from a NUMBER token."""
+
     value: Decimal
 
 
 @dataclass(slots=True)
 class UnaryNode:
+    """Unary ``+`` / ``-`` wrapping a single operand (right-associative chain)."""
+
     op: str
     child: "AstNode"
 
 
 @dataclass(slots=True)
 class BinaryNode:
+    """Binary operator with left/right children; operator set matches DC task grammar."""
+
     op: str
     left: "AstNode"
     right: "AstNode"
@@ -122,6 +135,7 @@ AstNode = NumberNode | UnaryNode | BinaryNode
 
 
 def count_binary_operators(node: AstNode) -> int:
+    """Counts ``BinaryNode`` instances for :func:`calculator.limits.enforce_binary_operator_budget`."""
     if isinstance(node, NumberNode):
         return 0
     if isinstance(node, UnaryNode):
@@ -130,19 +144,28 @@ def count_binary_operators(node: AstNode) -> int:
 
 
 class _Parser:
+    """
+    Recursive-descent parser. Each ``_parse_*`` layer encodes one precedence level; lower layers bind
+    tighter. Using a ``while`` loop at each binary level yields left-associativity for ``^`` (and
+    for ``+ - * /``), matching the module docstring contract.
+    """
+
     def __init__(self, tokens: list[Token]) -> None:
         self._tokens = tokens
         self._i = 0
 
     def _peek(self) -> Token | None:
+        """Current token without advancing; ``None`` means end of stream."""
         return self._tokens[self._i] if self._i < len(self._tokens) else None
 
     def _consume(self) -> Token:
+        """Advance past the current token; callers must have ensured a token exists."""
         t = self._tokens[self._i]
         self._i += 1
         return t
 
     def parse(self) -> AstNode:
+        """Parse full input; rejects trailing junk after a complete expression."""
         if not self._tokens:
             raise invalid_expression_error("empty expression")
         node = self._parse_expr()
@@ -154,6 +177,7 @@ class _Parser:
         return self._parse_add_sub()
 
     def _parse_add_sub(self) -> AstNode:
+        """Lowest precedence: ``+`` and ``-`` (left-associative)."""
         left = self._parse_mul_div()
         while True:
             t = self._peek()
@@ -166,6 +190,7 @@ class _Parser:
         return left
 
     def _parse_mul_div(self) -> AstNode:
+        """``*`` and ``/`` bind tighter than add/sub (left-associative)."""
         left = self._parse_pow()
         while True:
             t = self._peek()
@@ -178,6 +203,7 @@ class _Parser:
         return left
 
     def _parse_pow(self) -> AstNode:
+        # Loop (not right-recursive) makes ``a^b^c`` parse as ``(a^b)^c``.
         left = self._parse_unary()
         while True:
             t = self._peek()
@@ -189,6 +215,7 @@ class _Parser:
         return left
 
     def _parse_unary(self) -> AstNode:
+        """Repeated unary operators are right-nested (``--x`` → unary(-, unary(-, x)))."""
         t = self._peek()
         if t is None:
             raise invalid_expression_error("unexpected end of expression")
@@ -201,6 +228,7 @@ class _Parser:
         return self._parse_primary()
 
     def _parse_primary(self) -> AstNode:
+        """Numbers, or parenthesized sub-expression (``_parse_expr`` for inner precedence)."""
         t = self._peek()
         if t is None:
             raise invalid_expression_error("unexpected end of expression")
@@ -223,6 +251,7 @@ class _Parser:
 
 
 def parse_tokens(tokens: list[Token]) -> AstNode:
+    """Parse an already-tokenized stream (no length/binary limits—use for tests or composed pipelines)."""
     return _Parser(tokens).parse()
 
 
@@ -265,6 +294,7 @@ def evaluate_ast_decimal(node: AstNode) -> Decimal:
                 raise division_by_zero_error()
             return left / right
         if node.op == "^":
+            # Integral check is on the evaluated RHS (e.g. ``2^(1+2)``), not the literal token.
             if not is_integral_decimal(right):
                 raise invalid_expression_error(
                     "exponent must be integral after evaluation (see requirements-decisions)"
