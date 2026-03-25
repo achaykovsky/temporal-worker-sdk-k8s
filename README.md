@@ -31,7 +31,7 @@ poetry run pytest -m "not integration"
 1. Create the Postgres secret (see [PostgreSQL Secret](#postgresql-secret-no-cleartext-in-git)).
 2. Build and load the worker image: `docker build -t calculator-worker:0.1.0 .` then `minikube image load calculator-worker:0.1.0`.
 3. Deploy: `./scripts/deploy.sh` (Unix) or `.\scripts\deploy.ps1` (PowerShell).
-4. Port-forward Temporal: `kubectl port-forward -n temporal svc/temporal 127.0.0.1:7233:7233`, then `poetry run python scripts/trigger_calculator_workflow.py`.
+4. Port-forward Temporal: `kubectl port-forward -n temporal svc/temporal --address 127.0.0.1 7233:7233`, then `poetry run python scripts/trigger_calculator_workflow.py`.
 
 Optional HPA: `./scripts/deploy.sh --with-hpa` or `.\scripts\deploy.ps1 -ApplyHpa` (requires metrics-server). Details: [Autoscaling (bonus)](#autoscaling-bonus).
 
@@ -343,7 +343,7 @@ kubectl -n temporal rollout status deployment/calculator-worker-workflow
 Bind port-forward to **localhost** only:
 
 ```bash
-kubectl port-forward -n temporal svc/temporal 127.0.0.1:7233:7233
+kubectl port-forward -n temporal svc/temporal --address 127.0.0.1 7233:7233
 ```
 
 ```bash
