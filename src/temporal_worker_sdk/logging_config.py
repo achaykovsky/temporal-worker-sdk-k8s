@@ -12,6 +12,9 @@ from typing import Any, Mapping
 
 from temporal_worker_sdk.config import WorkerConfig
 
+# Log lines: avoid echoing credentials if TEMPORAL_ADDRESS ever uses URI userinfo.
+_LOG_TARGET_MAX_LEN = 128
+
 _LOG_CONTEXT: contextvars.ContextVar[dict[str, str]] = contextvars.ContextVar(
     "temporal_worker_sdk_log_ctx",
     default={},
@@ -26,6 +29,29 @@ def log_context_set(**fields: str) -> contextvars.Token[dict[str, str]]:
 
 def log_context_reset(token: contextvars.Token[dict[str, str]]) -> None:
     _LOG_CONTEXT.reset(token)
+
+
+def safe_temporal_target_for_log(address: str) -> str:
+    """
+    Return a monitoring-safe form of the gRPC target (host:port or URL).
+
+    Strips ``user:pass@`` if present and truncates very long values so logs stay parseable
+    without leaking credentials.
+    """
+    s = address.strip()
+    if not s:
+        return "(empty)"
+    if "@" in s:
+        s = s.rsplit("@", 1)[-1]
+    for prefix in ("grpc://", "http://", "https://"):
+        low = s[: len(prefix)].lower()
+        if low == prefix:
+            s = s[len(prefix) :]
+            break
+    if len(s) > _LOG_TARGET_MAX_LEN:
+        digest = hashlib.sha256(s.encode("utf-8", errors="replace")).hexdigest()[:8]
+        return f"{s[:_LOG_TARGET_MAX_LEN]}…(len={len(s)},id8={digest})"
+    return s
 
 
 def _payload_preview(value: object, *, max_len: int = 64) -> str:

@@ -27,7 +27,12 @@ logger = logging.getLogger(__name__)
 
 
 class ObservabilityInterceptor(Interceptor):
-    """Adds activity metrics and structured logs (no raw payloads at INFO)."""
+    """
+    Adds activity metrics and structured logs (no raw payloads at INFO).
+
+    Workflow/activity args appear only when ``TEMPORAL_WORKER_LOG_PAYLOADS_DEBUG`` is set, as
+    truncated previews (see ``logging_config._payload_preview``).
+    """
 
     def __init__(self, cfg: WorkerConfig, metrics: SdkMetrics) -> None:
         self._cfg = cfg
@@ -77,10 +82,9 @@ class ObservabilityInterceptor(Interceptor):
                     return await self.next.execute_workflow(input)
                 except asyncio.CancelledError:
                     raise
-                except BaseException as exc:
-                    wf_log.error(
+                except BaseException:
+                    wf_log.exception(
                         "workflow_task_failed",
-                        exc_info=exc,
                         extra={
                             "workflow_id": info.workflow_id,
                             "workflow_run_id": info.run_id,

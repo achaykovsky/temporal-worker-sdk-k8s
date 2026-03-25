@@ -17,7 +17,10 @@ from temporalio.worker import Worker
 
 from temporal_worker_sdk.config import WorkerConfig, load_worker_config
 from temporal_worker_sdk.health_server import HealthMetricsServer
-from temporal_worker_sdk.logging_config import configure_worker_logging
+from temporal_worker_sdk.logging_config import (
+    configure_worker_logging,
+    safe_temporal_target_for_log,
+)
 from temporal_worker_sdk.metrics import build_sdk_metrics
 from temporal_worker_sdk.observability_interceptor import ObservabilityInterceptor
 
@@ -180,11 +183,17 @@ async def _run_with_client(
     readiness_task = asyncio.create_task(mark_polling_started())
 
     try:
+        safe_target = safe_temporal_target_for_log(cfg.temporal_address)
         logger.info(
-            "starting_temporal_worker queue=%r namespace=%r address=%r",
+            "starting_temporal_worker temporal_target=%s queue=%r namespace=%r",
+            safe_target,
             cfg.task_queue,
             cfg.temporal_namespace,
-            cfg.temporal_address,
+            extra={
+                "temporal_target": safe_target,
+                "task_queue": cfg.task_queue,
+                "temporal_namespace": cfg.temporal_namespace,
+            },
         )
         await worker.run()
     finally:

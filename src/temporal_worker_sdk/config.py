@@ -68,7 +68,7 @@ def _optional_positive_float(name: str, default: float) -> float:
 
 @dataclass(frozen=True)
 class WorkerConfig:
-    """Typed worker settings after env validation."""
+    """Typed worker settings after env validation (immutable so passed config stays stable)."""
 
     temporal_address: str
     temporal_namespace: str

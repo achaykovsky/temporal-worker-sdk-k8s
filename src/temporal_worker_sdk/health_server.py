@@ -54,7 +54,12 @@ class HealthMetricsServer:
 
         class _Handler(BaseHTTPRequestHandler):
             def log_message(self, fmt: str, *args: object) -> None:
-                logger.debug("health_http %s", fmt % args)
+                # Omit client address and full Apache-style line (PII / noise); path is enough to spot probes.
+                path = urlparse(self.path).path.rstrip("/") or "/"
+                logger.debug(
+                    "health_http",
+                    extra={"http_method": self.command, "http_path": path},
+                )
 
             def do_GET(self) -> None:
                 path = urlparse(self.path).path.rstrip("/") or "/"

@@ -1,4 +1,8 @@
-"""Prometheus metrics for the worker SDK (low-cardinality labels only)."""
+"""
+Prometheus metrics for the worker SDK (low-cardinality labels only).
+
+Label values are activity type names — never workflow args or free-form user strings.
+"""
 
 from __future__ import annotations
 
