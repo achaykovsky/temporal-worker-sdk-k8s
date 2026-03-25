@@ -19,7 +19,7 @@ Python **`temporal_worker_sdk`**: env-based worker bootstrap, graceful shutdown,
 ## Prerequisites
 
 - Python **3.11+**, [Poetry](https://python-poetry.org/docs/#installation)
-- For the cluster path: container runtime, `kubectl`, [minikube](https://minikube.sigs.k8s.io/docs/start/) (or another cluster with kubeconfig set)
+- For the full stack: Docker (or compatible builder), `kubectl`, [minikube](https://minikube.sigs.k8s.io/docs/start/)
 
 ## Quick start
 
@@ -182,6 +182,8 @@ flowchart LR
 
 ## Kubernetes
 
+**Cluster:** The MVP is documented for **minikube** (see [requirements-decisions.md](specs/requirements/requirements-decisions.md) — local Kubernetes). Manifests are plain `kubectl` YAML; if you use another distro (kind, k3d, etc.), you must supply your own image load / registry flow — not covered here.
+
 **Namespace `temporal`:** Postgres, `temporalio/auto-setup`, six calculator Deployments. If `kubectl` errors with `localhost:8080` / `[::1]:8080`, there is no API server in the current context — start the cluster and fix context, for example:
 
 ```bash
@@ -310,14 +312,6 @@ Optional environment variables (same names as CLI flags where applicable):
 - `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE`
 - `STRESS_CONCURRENCY`, `STRESS_DURATION_SEC`, `CALC_EXPRESSION`
 - `STRESS_K8S_NAMESPACE`, `STRESS_K8S_DEPLOYMENT`
-
-### kind (optional)
-
-Load the local image into kind nodes:
-
-```bash
-kind load docker-image calculator-worker:0.1.0
-```
 
 ### Data volume
 
