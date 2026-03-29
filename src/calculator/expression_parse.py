@@ -22,14 +22,14 @@ from calculator.limits import enforce_binary_operator_budget, enforce_pre_parse_
 class TokenKind(Enum):
     """Lexeme categories for the calculator grammar (single-byte ASCII only)."""
 
-    NUMBER = auto()
+    NUMBER = auto() 
     PLUS = auto()
     MINUS = auto()
     STAR = auto()
     SLASH = auto()
     CARET = auto()
     LPAREN = auto()
-    RPAREN = auto()
+    RPAREN = auto() 
 
 
 @dataclass(frozen=True, slots=True)
