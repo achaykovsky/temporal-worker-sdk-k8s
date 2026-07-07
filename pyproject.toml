@@ -36,9 +36,6 @@ files = ["src"]
 warn_return_any = true
 warn_unused_configs = true
 
-[tool.pip-audit]
-ignore-vulnerabilities = ["CVE-2025-71176"]
-
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 markers = [

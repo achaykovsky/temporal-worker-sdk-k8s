@@ -14,19 +14,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
-    uses: achaykovsky/.github/.github/workflows/python-ci.yml@main
-    with:
-      python-version: "3.11"
-      pytest-args: '-m "not integration"'
-      run-mypy: false
+  poetry-check:
+    name: ci / poetry-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: achaykovsky/.github/.github/actions/setup-poetry@main
+        with:
+          python-version: "3.11"
+          poetry-version: "1.8.3"
+          install-dependencies: "false"
+
+      - name: Verify lockfile exists
+        run: test -f poetry.lock
+
+      - name: poetry check
+        run: poetry check
+
+  lint:
+    name: ci / lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: achaykovsky/.github/.github/actions/setup-poetry@main
+        with:
+          python-version: "3.11"
+          poetry-version: "1.8.3"
+
+      - name: Ruff lint
+        run: poetry run ruff check .
+
+      - name: Ruff format
+        run: poetry run ruff format --check .
 
   typecheck:
     name: ci / typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - uses: achaykovsky/.github/.github/actions/setup-poetry@main
         with:
           python-version: "3.11"
@@ -34,3 +56,27 @@ jobs:
 
       - name: mypy
         run: poetry run mypy src
+
+  test:
+    name: ci / test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: achaykovsky/.github/.github/actions/setup-poetry@main
+        with:
+          python-version: "3.11"
+          poetry-version: "1.8.3"
+
+      - name: pytest
+        run: poetry run pytest -m "not integration"
+
+  security:
+    name: ci / security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: achaykovsky/.github/.github/actions/setup-poetry@main
+        with:
+          python-version: "3.11"
+          poetry-version: "1.8.3"
+
+      - name: pip-audit
+        run: poetry run pip-audit --ignore-vuln CVE-2025-71176
