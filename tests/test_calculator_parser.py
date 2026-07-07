@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-import pytest
 from decimal import ROUND_UP, Decimal
+
+import pytest
 from temporalio.exceptions import ApplicationError
 
 from calculator.contracts import MAX_BINARY_OPERATORS_IN_EXPRESSION
-from calculator.expression_parse import evaluate_ast_decimal, parse_calculator_expression
+from calculator.expression_parse import (
+    evaluate_ast_decimal,
+    parse_calculator_expression,
+)
 from calculator.limits import strip_ignorable_whitespace
 
 

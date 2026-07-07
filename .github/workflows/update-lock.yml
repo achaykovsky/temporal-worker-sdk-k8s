@@ -2,6 +2,11 @@ name: Update poetry lockfile
 
 on:
   workflow_dispatch:
+  push:
+    branches: [adopt-shared-ci]
+    paths:
+      - pyproject.toml
+      - .github/workflows/update-lock.yml
 
 permissions:
   contents: write

@@ -33,7 +33,7 @@ EXIT_SHUTDOWN_HARD_TIMEOUT = 124
 def run_worker(
     *,
     workflows: Sequence[type] | None = None,
-    activities: Sequence[Callable] | None = None,
+    activities: Sequence[Callable[..., object]] | None = None,
     config: WorkerConfig | None = None,
     client: Client | None = None,
 ) -> None:
@@ -58,7 +58,7 @@ def run_worker(
 async def run_worker_async(
     *,
     workflows: Sequence[type] | None = None,
-    activities: Sequence[Callable] | None = None,
+    activities: Sequence[Callable[..., object]] | None = None,
     config: WorkerConfig | None = None,
     client: Client | None = None,
 ) -> None:
@@ -87,7 +87,9 @@ def _install_shutdown_handlers(
             try:
                 signal.signal(
                     sig,
-                    lambda *_args, loop_ref=loop: loop_ref.call_soon_threadsafe(schedule_shutdown),
+                    lambda *_args, loop_ref=loop: loop_ref.call_soon_threadsafe(
+                        schedule_shutdown
+                    ),
                 )
             except (ValueError, OSError):
                 logger.warning(
@@ -100,7 +102,7 @@ async def _run_with_client(
     cfg: WorkerConfig,
     client: Client,
     workflows: Sequence[type],
-    activities: Sequence[Callable],
+    activities: Sequence[Callable[..., object]],
 ) -> None:
     configure_worker_logging(cfg)
 
@@ -151,7 +153,7 @@ async def _run_with_client(
         )
         try:
             await asyncio.wait_for(worker.shutdown(), timeout=cfg.shutdown_max_wait_sec)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error(
                 "shutdown_max_wait_exceeded; exiting with code %s (activities may have been "
                 "cancelled per Temporal graceful_shutdown_timeout=%ss)",

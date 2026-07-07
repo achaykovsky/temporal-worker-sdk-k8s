@@ -7,8 +7,9 @@ import hashlib
 import json
 import logging
 import sys
-from datetime import datetime, timezone
-from typing import Any, Mapping
+from collections.abc import Mapping
+from datetime import UTC, datetime
+from typing import Any
 
 from temporal_worker_sdk.config import WorkerConfig
 
@@ -112,7 +113,7 @@ class JsonLogFormatter(logging.Formatter):
     )
 
     def format(self, record: logging.LogRecord) -> str:
-        ts = datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat()
+        ts = datetime.fromtimestamp(record.created, tz=UTC).isoformat()
         payload: dict[str, Any] = {
             "ts": ts,
             "level": record.levelname,

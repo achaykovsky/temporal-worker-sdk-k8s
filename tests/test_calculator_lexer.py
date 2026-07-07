@@ -12,7 +12,11 @@ from calculator.limits import strip_ignorable_whitespace
 
 def test_tokenize_simple_binary_like_expression() -> None:
     toks = tokenize("1+2")
-    assert [t.kind for t in toks] == [TokenKind.NUMBER, TokenKind.PLUS, TokenKind.NUMBER]
+    assert [t.kind for t in toks] == [
+        TokenKind.NUMBER,
+        TokenKind.PLUS,
+        TokenKind.NUMBER,
+    ]
     assert toks[0].value == "1"
     assert toks[2].value == "2"
 

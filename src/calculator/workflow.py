@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 from decimal import ROUND_UP, Decimal
+from typing import cast
 
 from temporalio import workflow
 from temporalio.common import RetryPolicy
@@ -68,12 +69,15 @@ class CalculatorWorkflow:
                         "exponent must be integral after evaluation (see requirements-decisions)"
                     )
             activity_name, task_queue = activity_and_queue_for_binary_operator(node.op)
-            return await workflow.execute_activity(
-                activity_name,
-                args=[left_s, right_s],
-                task_queue=task_queue,
-                start_to_close_timeout=_ACTIVITY_START_TO_CLOSE,
-                retry_policy=_ACTIVITY_RETRY_POLICY,
-                result_type=str,
+            return cast(
+                str,
+                await workflow.execute_activity(
+                    activity_name,
+                    args=[left_s, right_s],
+                    task_queue=task_queue,
+                    start_to_close_timeout=_ACTIVITY_START_TO_CLOSE,
+                    retry_policy=_ACTIVITY_RETRY_POLICY,
+                    result_type=str,
+                ),
             )
         raise TypeError(f"unknown AST node: {type(node)!r}")

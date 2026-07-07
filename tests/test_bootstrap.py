@@ -11,7 +11,9 @@ from temporal_worker_sdk.config import WorkerConfig
 
 
 @pytest.mark.asyncio
-async def test_run_worker_async_polls_configured_queue(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_run_worker_async_polls_configured_queue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     captured: dict[str, object] = {}
 
     class FakeWorker:
@@ -78,7 +80,9 @@ async def test_run_worker_async_polls_configured_queue(monkeypatch: pytest.Monke
 
 
 @pytest.mark.asyncio
-async def test_run_worker_async_connects_when_no_client(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_run_worker_async_connects_when_no_client(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     captured: dict[str, object] = {}
 
     async def fake_connect(
@@ -110,7 +114,9 @@ async def test_run_worker_async_connects_when_no_client(monkeypatch: pytest.Monk
         async def shutdown(self) -> None:
             pass
 
-    monkeypatch.setattr(bootstrap.Client, "connect", AsyncMock(side_effect=fake_connect))
+    monkeypatch.setattr(
+        bootstrap.Client, "connect", AsyncMock(side_effect=fake_connect)
+    )
     monkeypatch.setattr(bootstrap, "Worker", FakeWorker)
 
     cfg = WorkerConfig(
@@ -126,7 +132,9 @@ async def test_run_worker_async_connects_when_no_client(monkeypatch: pytest.Monk
         log_payloads_debug=False,
     )
 
-    await bootstrap.run_worker_async(workflows=[], activities=[], config=cfg, client=None)
+    await bootstrap.run_worker_async(
+        workflows=[], activities=[], config=cfg, client=None
+    )
 
     assert captured["address"] == "temporal:7233"
     assert captured["namespace"] == "ns1"

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import temporalio.activity as activity_mod
@@ -20,7 +20,11 @@ from temporalio.worker import (
 )
 
 from temporal_worker_sdk.config import WorkerConfig
-from temporal_worker_sdk.logging_config import _payload_preview, log_context_reset, log_context_set
+from temporal_worker_sdk.logging_config import (
+    _payload_preview,
+    log_context_reset,
+    log_context_set,
+)
 from temporal_worker_sdk.metrics import SdkMetrics
 
 logger = logging.getLogger(__name__)
@@ -38,7 +42,9 @@ class ObservabilityInterceptor(Interceptor):
         self._cfg = cfg
         self._metrics = metrics
 
-    def intercept_activity(self, next: ActivityInboundInterceptor) -> ActivityInboundInterceptor:
+    def intercept_activity(
+        self, next: ActivityInboundInterceptor
+    ) -> ActivityInboundInterceptor:
         return _ActivityObservabilityInbound(next, self._cfg, self._metrics)
 
     def workflow_interceptor_class(
@@ -70,7 +76,9 @@ class ObservabilityInterceptor(Interceptor):
                             "workflow_type": input.type.__name__,
                         },
                     )
-                    if self._cfg_inner.log_payloads_debug and wf_log.isEnabledFor(logging.DEBUG):
+                    if self._cfg_inner.log_payloads_debug and wf_log.isEnabledFor(
+                        logging.DEBUG
+                    ):
                         wf_log.debug(
                             "workflow_args_preview %s",
                             _payload_preview(input.args),
@@ -139,13 +147,15 @@ class _ActivityObservabilityInbound(ActivityInboundInterceptor):
                 extra={"activity_type": activity_name},
             )
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         scheduled = info.scheduled_time
         if scheduled.tzinfo is None:
-            scheduled = scheduled.replace(tzinfo=timezone.utc)
+            scheduled = scheduled.replace(tzinfo=UTC)
         delay = (now - scheduled).total_seconds()
         if delay >= 0:
-            self._metrics.activity_schedule_to_start_seconds.labels(activity_name).observe(delay)
+            self._metrics.activity_schedule_to_start_seconds.labels(
+                activity_name
+            ).observe(delay)
 
         t0 = time.perf_counter()
         try:
@@ -169,5 +179,7 @@ class _ActivityObservabilityInbound(ActivityInboundInterceptor):
             return result
         finally:
             elapsed = time.perf_counter() - t0
-            self._metrics.activity_execution_seconds.labels(activity_name).observe(elapsed)
+            self._metrics.activity_execution_seconds.labels(activity_name).observe(
+                elapsed
+            )
             log_context_reset(token)

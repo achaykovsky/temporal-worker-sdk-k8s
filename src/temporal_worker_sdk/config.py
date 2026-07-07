@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 
 class ConfigError(ValueError):
     """Raised when required configuration is missing or invalid."""
 
-    def __init__(self, message: str, *, missing_var: Optional[str] = None) -> None:
+    def __init__(self, message: str, *, missing_var: str | None = None) -> None:
         super().__init__(message)
         self.missing_var = missing_var
 
@@ -38,7 +37,7 @@ def _required_str(name: str) -> str:
     return stripped
 
 
-def _optional_str(name: str) -> Optional[str]:
+def _optional_str(name: str) -> str | None:
     raw = os.environ.get(name)
     if raw is None:
         return None
@@ -73,10 +72,10 @@ class WorkerConfig:
     temporal_address: str
     temporal_namespace: str
     task_queue: str
-    worker_role: Optional[str]
-    temporal_identity: Optional[str]
+    worker_role: str | None
+    temporal_identity: str | None
     log_json: bool
-    health_bind_addr: Optional[str]
+    health_bind_addr: str | None
     graceful_shutdown_timeout_sec: float
     shutdown_max_wait_sec: float
     log_payloads_debug: bool

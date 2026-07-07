@@ -91,9 +91,7 @@ def snapshot_k8s(namespace: str, deployment: str) -> dict[str, str]:
         ]
     )
     if top is None:
-        alt = _kubectl_lines(
-            ["-n", namespace, "top", "pods", "--no-headers"]
-        )
+        alt = _kubectl_lines(["-n", namespace, "top", "pods", "--no-headers"])
         out["kubectl_top_pods"] = (
             alt
             if alt
@@ -187,7 +185,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--k8s-deployment",
-        default=os.environ.get("STRESS_K8S_DEPLOYMENT", "calculator-worker-add").strip(),
+        default=os.environ.get(
+            "STRESS_K8S_DEPLOYMENT", "calculator-worker-add"
+        ).strip(),
         help="Deployment name for kubectl replica snapshot.",
     )
     args = parser.parse_args()

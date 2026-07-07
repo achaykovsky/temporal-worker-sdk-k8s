@@ -15,7 +15,10 @@ def test_parse_bind_addr_host_port() -> None:
 
 
 def test_safe_temporal_target_for_log_strips_userinfo_and_truncates() -> None:
-    assert safe_temporal_target_for_log("grpc://user:secret@host.example:7233") == "host.example:7233"
+    assert (
+        safe_temporal_target_for_log("grpc://user:secret@host.example:7233")
+        == "host.example:7233"
+    )
     assert safe_temporal_target_for_log(" 127.0.0.1:7233 ") == "127.0.0.1:7233"
     long_target = "a" * 200
     out = safe_temporal_target_for_log(long_target)

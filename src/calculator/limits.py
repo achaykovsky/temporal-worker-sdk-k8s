@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
-from calculator.contracts import EXPRESSION_MAX_CHARS, MAX_BINARY_OPERATORS_IN_EXPRESSION
-from calculator.errors import binary_operator_limit_exceeded_error, input_length_exceeds_limit_error
+from calculator.contracts import (
+    EXPRESSION_MAX_CHARS,
+    MAX_BINARY_OPERATORS_IN_EXPRESSION,
+)
+from calculator.errors import (
+    binary_operator_limit_exceeded_error,
+    input_length_exceeds_limit_error,
+)
 
 
 def strip_ignorable_whitespace(expression: str) -> str:

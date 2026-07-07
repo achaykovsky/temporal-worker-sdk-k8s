@@ -16,20 +16,23 @@ from enum import Enum, auto
 from typing import Final
 
 from calculator.errors import division_by_zero_error, invalid_expression_error
-from calculator.limits import enforce_binary_operator_budget, enforce_pre_parse_length_limit
+from calculator.limits import (
+    enforce_binary_operator_budget,
+    enforce_pre_parse_length_limit,
+)
 
 
 class TokenKind(Enum):
     """Lexeme categories for the calculator grammar (single-byte ASCII only)."""
 
-    NUMBER = auto() 
+    NUMBER = auto()
     PLUS = auto()
     MINUS = auto()
     STAR = auto()
     SLASH = auto()
     CARET = auto()
     LPAREN = auto()
-    RPAREN = auto() 
+    RPAREN = auto()
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,7 +78,6 @@ def tokenize(stripped: str) -> list[Token]:
             i += 1
             continue
         if c.isdigit() or c == ".":
-            start = i
             # Leading '.' requires a digit next (".5" ok, bare "." is a syntax error).
             if c == ".":
                 j = i + 1
@@ -119,7 +121,7 @@ class UnaryNode:
     """Unary ``+`` / ``-`` wrapping a single operand (right-associative chain)."""
 
     op: str
-    child: "AstNode"
+    child: AstNode
 
 
 @dataclass(slots=True)
@@ -127,8 +129,8 @@ class BinaryNode:
     """Binary operator with left/right children; operator set matches DC task grammar."""
 
     op: str
-    left: "AstNode"
-    right: "AstNode"
+    left: AstNode
+    right: AstNode
 
 
 AstNode = NumberNode | UnaryNode | BinaryNode
@@ -237,7 +239,9 @@ class _Parser:
             try:
                 d = Decimal(t.value)
             except InvalidOperation as exc:
-                raise invalid_expression_error(f"invalid numeric literal: {t.value!r}") from exc
+                raise invalid_expression_error(
+                    f"invalid numeric literal: {t.value!r}"
+                ) from exc
             return NumberNode(d)
         if t.kind == TokenKind.LPAREN:
             self._consume()

@@ -47,7 +47,9 @@ async def _run(expression: str, address: str, namespace: str) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Trigger CalculatorWorkflow on Temporal.")
+    parser = argparse.ArgumentParser(
+        description="Trigger CalculatorWorkflow on Temporal."
+    )
     parser.add_argument(
         "expression",
         nargs="?",

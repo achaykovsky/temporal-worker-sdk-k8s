@@ -30,7 +30,10 @@ from __future__ import annotations
 
 from temporalio.exceptions import ApplicationError
 
-from calculator.contracts import EXPRESSION_MAX_CHARS, MAX_BINARY_OPERATORS_IN_EXPRESSION
+from calculator.contracts import (
+    EXPRESSION_MAX_CHARS,
+    MAX_BINARY_OPERATORS_IN_EXPRESSION,
+)
 
 
 def input_length_exceeds_limit_error(*, length: int) -> ApplicationError:

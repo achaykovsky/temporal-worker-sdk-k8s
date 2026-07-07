@@ -10,8 +10,6 @@ from __future__ import annotations
 import os
 import sys
 
-from temporal_worker_sdk import run_worker
-
 from calculator.activities import (
     add_activity,
     divide_activity,
@@ -20,6 +18,7 @@ from calculator.activities import (
     subtract_activity,
 )
 from calculator.workflow import CalculatorWorkflow
+from temporal_worker_sdk import run_worker
 
 
 def main() -> None:

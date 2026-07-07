@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import logging
 import threading
+from collections.abc import Callable
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Callable
 from urllib.parse import urlparse
 
 from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, generate_latest
