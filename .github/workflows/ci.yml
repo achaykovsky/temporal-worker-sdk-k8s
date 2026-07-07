@@ -19,3 +19,18 @@ jobs:
     with:
       python-version: "3.11"
       pytest-args: '-m "not integration"'
+      run-mypy: false
+
+  typecheck:
+    name: ci / typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: achaykovsky/.github/.github/actions/setup-poetry@main
+        with:
+          python-version: "3.11"
+          poetry-version: "1.8.3"
+
+      - name: mypy
+        run: poetry run mypy src

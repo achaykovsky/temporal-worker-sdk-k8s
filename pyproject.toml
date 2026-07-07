@@ -15,7 +15,7 @@ temporalio = ">=1.7.0,<2"
 prometheus-client = "^0.24.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
+pytest = "^9.0.3"
 pytest-asyncio = "^0.23.0"
 ruff = "^0.8"
 mypy = "^1.13"
@@ -35,10 +35,6 @@ python_version = "3.11"
 files = ["src"]
 warn_return_any = true
 warn_unused_configs = true
-
-[[tool.mypy.overrides]]
-module = ["tests.*", "examples.*", "scripts.*"]
-ignore_errors = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
